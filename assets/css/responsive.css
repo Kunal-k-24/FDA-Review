@@ -24,26 +24,59 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--bg-primary);
+    background-color: #0D1511 !important; /* Fully opaque primary dark background */
     flex-direction: column;
     align-items: stretch;
     padding: var(--space-6);
     gap: var(--space-6);
-    z-index: 999;
+    z-index: 99999;
+    border-top: 1px solid var(--border-default);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.95);
+    overflow-y: auto;
   }
 
   .site-nav.mobile-open {
-    display: flex;
+    display: flex !important;
   }
 
   .nav-links {
     flex-direction: column;
     align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .nav-link {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-base);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
   }
 
   .nav-actions {
     flex-direction: column;
     align-items: stretch;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .nav-actions .btn {
+    width: 100%;
+    padding: 0.85rem;
+    font-size: var(--font-size-base);
+  }
+
+  .user-menu-btn {
+    width: 100%;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .wallet-quick-badge {
+    justify-content: center;
+    padding: var(--space-3);
+    font-size: var(--font-size-sm);
   }
 
   .mobile-nav-toggle {
