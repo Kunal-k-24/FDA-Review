@@ -1,0 +1,86 @@
+/* ==============================================================================
+   FDAReview Responsive Breakpoints
+   ============================================================================== */
+
+@media (max-width: 1024px) {
+  .explore-container {
+    grid-template-columns: 360px 1fr;
+  }
+  
+  .reviews-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --header-height: 64px;
+  }
+
+  .site-nav {
+    display: none;
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-primary);
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space-6);
+    gap: var(--space-6);
+    z-index: 999;
+  }
+
+  .site-nav.mobile-open {
+    display: flex;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nav-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mobile-nav-toggle {
+    display: flex;
+  }
+
+  /* Explore page stack or toggle */
+  .explore-container {
+    display: flex;
+    flex-direction: column-reverse;
+    height: auto;
+  }
+
+  .places-sidebar {
+    height: 500px;
+  }
+
+  .map-wrapper {
+    height: 380px;
+  }
+
+  .search-bar-wrapper {
+    flex-direction: column;
+    border-radius: var(--radius-xl);
+    padding: var(--space-3);
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .wallet-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}

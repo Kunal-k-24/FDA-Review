@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Wallet & Redemption — FDAReview</title>
+  <meta name="description" content="View your FDA Coin balance, simulated INR conversion, atomic transaction ledger, and submit simulated redemptions.">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div id="main-header"></div>
+
+  <main class="main-content container">
+    <div style="margin-top: var(--space-8); margin-bottom: var(--space-4);">
+      <h1>My FDA Wallet</h1>
+      <p>Track earned coins from verified reviews and request simulated rupee redemptions.</p>
+    </div>
+
+    <!-- Balance Overview Cards -->
+    <section class="wallet-hero">
+      <div class="balance-card">
+        <div>
+          <div style="font-size: var(--font-size-sm); color: var(--text-muted); font-weight: var(--font-weight-medium); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);">
+            Available Coin Balance
+          </div>
+          <div class="balance-amount">
+            <span class="coin-icon" style="width:36px;height:36px;font-size:20px;">©</span>
+            <span id="wallet-balance-num">0</span>
+          </div>
+          <div class="balance-inr-equiv" id="wallet-inr-equiv">
+            Illustrative Value: ₹0.00
+          </div>
+        </div>
+        <div style="margin-top: var(--space-6); font-size: var(--font-size-xs); color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: var(--space-3);">
+          ⚡ Conversion Rate: 1,000 FDA Coins = ₹10 (100 Coins = ₹1)
+        </div>
+      </div>
+
+      <!-- Quick Redeem Card -->
+      <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div class="card-header" style="margin-bottom: var(--space-3);">
+            <h3 class="card-title" style="font-size: var(--font-size-lg);">Simulate Redemption</h3>
+            <span class="badge badge-lime">Instant Reserve</span>
+          </div>
+          <p style="font-size: var(--font-size-xs); color: var(--text-muted); margin-bottom: var(--space-4);">
+            Convert your earned coins into simulated rupees. Coins are atomically reserved and sent for admin approval. No real payment transfer occurs.
+          </p>
+
+          <form id="redemption-form">
+            <div class="form-group">
+              <label class="form-label" for="redeem-amount-input">
+                <span>Coins to Redeem</span>
+                <span id="redeem-calc-preview" style="color:var(--accent-primary); font-weight:bold;">= ₹0.00</span>
+              </label>
+              <input type="number" id="redeem-amount-input" class="form-input" min="10" step="10" placeholder="e.g. 100" required>
+            </div>
+
+            <button type="submit" id="redeem-submit-btn" class="btn btn-primary btn-block">
+              Request Simulated Redemption
+            </button>
+          </form>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: var(--space-4);">
+          * Redemption request for promotional simulation. FDA Coins hold no actual cash surrender value.
+        </div>
+      </div>
+    </section>
+
+    <!-- Redemption Requests Status -->
+    <section style="margin-bottom: var(--space-8);">
+      <div class="card-header">
+        <h2 style="font-size: var(--font-size-xl);">Redemption Requests</h2>
+        <span id="redemptions-count-badge" class="badge badge-info">0 requests</span>
+      </div>
+
+      <div class="data-table-wrapper">
+        <table class="data-table" id="redemptions-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Coins Requested</th>
+              <th>Illustrative INR</th>
+              <th>Status</th>
+              <th>Admin Note</th>
+            </tr>
+          </thead>
+          <tbody id="redemptions-tbody">
+            <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Loading redemption requests...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Ledger Transactions Table -->
+    <section style="margin-bottom: var(--space-12);">
+      <div class="card-header">
+        <h2 style="font-size: var(--font-size-xl);">Coin Transaction Ledger</h2>
+        <span id="transactions-count-badge" class="badge" style="background:var(--bg-card);color:var(--text-muted);">0 transactions</span>
+      </div>
+
+      <div class="data-table-wrapper">
+        <table class="data-table" id="transactions-table">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Type</th>
+              <th>Description</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody id="transactions-tbody">
+            <tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Loading transaction ledger...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="main-footer"></div>
+
+  <script type="module">
+    import { initAuth, getCurrentUser } from './assets/js/auth.js';
+    import { renderNavigation, renderFooter } from './assets/js/navigation.js';
+    import { fetchUserWalletData, requestRedemption } from './assets/js/wallet.js';
+    import { showToast, escapeHTML, formatCoins, formatRupees, formatDateTime } from './assets/js/ui.js';
+    import { CONFIG } from './assets/js/config.js';
+
+    let currentBalance = 0;
+
+    async function initWalletPage() {
+      const { user } = await initAuth();
+      renderNavigation('wallet');
+      renderFooter();
+
+      if (!user) {
+        showToast('Please sign in to access your wallet', 'warning');
+        setTimeout(() => window.location.href = 'login.html', 1000);
+        return;
+      }
+
+      await loadWalletData(user.id);
+      setupRedemptionForm(user.id);
+    }
+
+    async function loadWalletData(userId) {
+      try {
+        const { wallet, transactions, redemptions } = await fetchUserWalletData(userId);
+        currentBalance = Number(wallet.balance_coins) || 0;
+
+        // Populate Balance UI
+        document.getElementById('wallet-balance-num').textContent = formatCoins(currentBalance);
+        document.getElementById('wallet-inr-equiv').textContent = `Illustrative Value: ${formatRupees(currentBalance)}`;
+        const redeemInput = document.getElementById('redeem-amount-input');
+        redeemInput.max = currentBalance;
+
+        // Render Redemptions
+        renderRedemptionsTable(redemptions);
+
+        // Render Transactions Ledger
+        renderTransactionsTable(transactions);
+      } catch (err) {
+        console.error('Failed to load wallet data:', err);
+        showToast('Error loading wallet ledger: ' + err.message, 'error');
+      }
+    }
+
+    function renderRedemptionsTable(redemptions) {
+      const tbody = document.getElementById('redemptions-tbody');
+      document.getElementById('redemptions-count-badge').textContent = `${redemptions.length} requests`;
+
+      if (!redemptions || redemptions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:var(--space-6);">No redemption requests submitted yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = redemptions.map(r => {
+        let badgeClass = 'badge-warning';
+        if (r.status === 'approved') badgeClass = 'badge-success';
+        if (r.status === 'rejected') badgeClass = 'badge-error';
+
+        return `
+          <tr>
+            <td>${formatDateTime(r.created_at)}</td>
+            <td><strong>${formatCoins(r.requested_coins)}</strong> Coins</td>
+            <td style="color:var(--accent-primary); font-weight:600;">₹${r.illustrative_amount_inr}</td>
+            <td><span class="badge ${badgeClass}">${escapeHTML(r.status)}</span></td>
+            <td style="color:var(--text-muted); font-size:12px;">${escapeHTML(r.admin_note || '-')}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderTransactionsTable(transactions) {
+      const tbody = document.getElementById('transactions-tbody');
+      document.getElementById('transactions-count-badge').textContent = `${transactions.length} entries`;
+
+      if (!transactions || transactions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:var(--space-6);">No transactions in ledger.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = transactions.map(tx => {
+        const amount = Number(tx.amount_coins);
+        const isPositive = amount > 0;
+        const color = isPositive ? 'var(--status-success)' : 'var(--status-error)';
+        const prefix = isPositive ? '+' : '';
+
+        return `
+          <tr>
+            <td style="font-size:12px; color:var(--text-secondary);">${formatDateTime(tx.created_at)}</td>
+            <td><span class="badge badge-lime" style="font-size:10px;">${escapeHTML(tx.transaction_type)}</span></td>
+            <td>${escapeHTML(tx.description)}</td>
+            <td style="color:${color}; font-weight:bold; font-family:var(--font-mono); font-size:14px;">
+              ${prefix}${formatCoins(amount)} Coins
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function setupRedemptionForm(userId) {
+      const form = document.getElementById('redemption-form');
+      const input = document.getElementById('redeem-amount-input');
+      const preview = document.getElementById('redeem-calc-preview');
+      const submitBtn = document.getElementById('redeem-submit-btn');
+
+      input.addEventListener('input', () => {
+        const coins = parseInt(input.value, 10) || 0;
+        const inr = (coins / CONFIG.COINS_TO_INR_RATIO).toFixed(2);
+        preview.textContent = `= ₹${inr}`;
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const coins = parseInt(input.value, 10);
+
+        if (isNaN(coins) || coins <= 0) {
+          showToast('Please enter a valid amount of coins to redeem', 'warning');
+          return;
+        }
+
+        if (coins > currentBalance) {
+          showToast(`Insufficient balance! You have ${currentBalance} coins available.`, 'error');
+          return;
+        }
+
+        const confirmSubmit = confirm(`Confirm simulated redemption of ${coins} FDA Coins (illustrative value ₹${(coins/CONFIG.COINS_TO_INR_RATIO).toFixed(2)})? Coins will be reserved immediately.`);
+        if (!confirmSubmit) return;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting reservation...';
+
+        try {
+          const res = await requestRedemption(coins, currentBalance);
+          showToast(`Redemption request submitted! Reserved ${res.reserved_coins} coins.`, 'success');
+          input.value = '';
+          preview.textContent = '= ₹0.00';
+          await loadWalletData(userId);
+          renderNavigation('wallet');
+        } catch (err) {
+          console.error('Redemption error:', err);
+          showToast(err.message || 'Failed to submit redemption request.', 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Request Simulated Redemption';
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', initWalletPage);
+  </script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+/* ==============================================================================
+   FDAReview Design System - CSS Variables
+   Dark Forest-Green with Fresh Lime Accents
+   ============================================================================== */
+
+:root {
+  /* Colors */
+  --bg-primary: #0D1511;
+  --bg-secondary: #142019;
+  --bg-card: #18271E;
+  --bg-card-hover: #1E3327;
+  --bg-surface: #1C2D23;
+  --bg-elevated: #23392C;
+
+  --accent-primary: #B8F36B;
+  --accent-secondary: #91CF4C;
+  --accent-hover: #C5F77F;
+  --accent-dim: rgba(184, 243, 107, 0.12);
+  --accent-dim-strong: rgba(184, 243, 107, 0.22);
+
+  --text-primary: #F4F7F2;
+  --text-secondary: #A5B3A8;
+  --text-muted: #6E7E73;
+  --text-inverse: #0D1511;
+
+  --border-subtle: #243429;
+  --border-default: #2B3B30;
+  --border-accent: rgba(184, 243, 107, 0.4);
+
+  --status-error: #FF6B6B;
+  --status-error-bg: rgba(255, 107, 107, 0.12);
+  --status-success: #69DB7C;
+  --status-success-bg: rgba(105, 219, 124, 0.12);
+  --status-warning: #FCC419;
+  --status-warning-bg: rgba(252, 196, 25, 0.12);
+  --status-info: #4DABF7;
+  --status-info-bg: rgba(77, 171, 247, 0.12);
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.25rem;     /* 20px */
+  --font-size-2xl: 1.5rem;     /* 24px */
+  --font-size-3xl: 1.875rem;   /* 30px */
+  --font-size-4xl: 2.25rem;    /* 36px */
+  --font-size-5xl: 3rem;       /* 48px */
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Border Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.5);
+  --shadow-accent: 0 0 20px rgba(184, 243, 107, 0.18);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout */
+  --max-width: 1280px;
+  --header-height: 72px;
+}

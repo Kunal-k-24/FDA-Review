@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Establishment Details & Reviews — FDAReview</title>
+  <meta name="description" content="View hotel ratings, address, OpenStreetMap coordinates, and submit community reviews to earn 10 FDA Coins.">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div id="main-header"></div>
+
+  <main class="main-content container">
+    <!-- Header Card -->
+    <section class="hotel-header-card" id="hotel-header-info">
+      <div class="hotel-meta-info">
+        <a href="index.html" class="btn btn-secondary btn-sm" style="margin-bottom: var(--space-3);">&larr; Back to Map</a>
+        <div style="display:flex; align-items:center; gap: var(--space-2); margin-bottom: var(--space-2);">
+          <span class="badge badge-lime" id="hotel-category-badge">Establishment</span>
+          <span class="badge" style="background:var(--bg-secondary);color:var(--text-muted);font-family:var(--font-mono);" id="hotel-osm-badge">OSM ID: -</span>
+        </div>
+        <h1 id="hotel-name" style="margin-bottom: var(--space-2);">Loading Establishment...</h1>
+        <p id="hotel-address" style="color:var(--text-secondary); margin-bottom: var(--space-4);">Locating address on OpenStreetMap...</p>
+        
+        <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+          <a id="get-directions-btn" href="#" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">
+            <span>🗺️</span> Get Directions ↗
+          </a>
+          <button id="scroll-to-review-btn" class="btn btn-primary btn-sm">
+            <span>✍️</span> Write a Review (+10 Coins)
+          </button>
+        </div>
+      </div>
+
+      <!-- Rating Stats Box -->
+      <div class="hotel-stats-card">
+        <div style="text-align: center;">
+          <div class="hotel-avg-score" id="hotel-avg-score">-</div>
+          <div id="hotel-avg-stars" style="margin: 4px 0;">★★★★★</div>
+          <div style="font-size: var(--font-size-xs); color: var(--text-muted);" id="hotel-reviews-count">0 reviews</div>
+        </div>
+        <div style="border-left: 1px solid var(--border-subtle); padding-left: var(--space-4); font-size: var(--font-size-xs); line-height: 1.6; color: var(--text-secondary);">
+          <div>Verified ratings</div>
+          <div>Earn <strong style="color:var(--accent-primary);">10 FDA Coins</strong> per review</div>
+          <div>Atomic ledger rewards</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Grid: Reviews List & Review Form -->
+    <div class="reviews-grid">
+      <!-- Left Column: Community Reviews -->
+      <div>
+        <div class="card-header">
+          <h2 style="font-size: var(--font-size-xl);">Community Reviews</h2>
+          <span id="reviews-meta-count" style="font-size: var(--font-size-sm); color: var(--text-muted);">0 total</span>
+        </div>
+
+        <div id="reviews-list-container">
+          <div class="skeleton" style="height: 120px; margin-bottom: var(--space-4);"></div>
+          <div class="skeleton" style="height: 120px; margin-bottom: var(--space-4);"></div>
+        </div>
+      </div>
+
+      <!-- Right Column: Review Submission Form & Mini Map Preview -->
+      <div>
+        <!-- Mini Map Preview -->
+        <div class="card" style="margin-bottom: var(--space-6); padding: var(--space-4);">
+          <div style="font-weight: var(--font-weight-semibold); font-size: var(--font-size-sm); margin-bottom: var(--space-3);">Location Preview</div>
+          <div id="mini-map" style="height: 180px; border-radius: var(--radius-md); overflow: hidden;"></div>
+        </div>
+
+        <!-- Review Form Card -->
+        <div class="card" id="review-form-card">
+          <div class="card-header">
+            <h3 style="font-size: var(--font-size-lg);" id="form-card-title">Share Your Experience</h3>
+            <span class="badge badge-lime">+10 Coins</span>
+          </div>
+
+          <div id="review-auth-notice" class="alert alert-info" style="display:none;">
+            <div>
+              Please <a href="login.html" style="font-weight:bold;">Sign In</a> to post a review and earn 10 FDA Coins.
+            </div>
+          </div>
+
+          <div id="user-existing-review-notice" class="alert alert-info" style="display:none;">
+            <div>
+              You already reviewed this place! Submitting below will <strong>edit your existing review</strong> (per system rules, edits do not award duplicate coins).
+            </div>
+          </div>
+
+          <form id="submit-review-form">
+            <div class="form-group">
+              <label class="form-label">Your Rating (1 to 5 Stars)</label>
+              <div id="star-selector" style="display:flex; gap: 8px; font-size: 1.75rem;">
+                <span class="star-interactive" data-star="1">★</span>
+                <span class="star-interactive" data-star="2">★</span>
+                <span class="star-interactive" data-star="3">★</span>
+                <span class="star-interactive" data-star="4">★</span>
+                <span class="star-interactive" data-star="5">★</span>
+              </div>
+              <input type="hidden" id="selected-rating" value="5">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="review-textarea">
+                <span>Written Review</span>
+                <span id="char-counter" style="color:var(--text-muted); font-size: 11px;">0 / 1000</span>
+              </label>
+              <textarea id="review-textarea" class="form-textarea" placeholder="Describe the ambiance, food taste, cleanliness, or hospitality (min 10 characters)..." maxlength="1000" required></textarea>
+            </div>
+
+            <button type="submit" id="post-review-btn" class="btn btn-primary btn-block btn-lg">
+              Submit Review & Earn 10 Coins
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="main-footer"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script type="module">
+    import { initAuth, getCurrentUser, getCurrentProfile } from './assets/js/auth.js';
+    import { renderNavigation, renderFooter } from './assets/js/navigation.js';
+    import { getOrCreateDbHotel, fetchHotelReviews, submitNewReview, updateExistingReview, reportReview } from './assets/js/reviews.js';
+    import { showToast, escapeHTML, formatDate, renderStarRating } from './assets/js/ui.js';
+    import { getDirectionsUrl } from './assets/js/map.js';
+
+    let currentPlace = null;
+    let dbHotelId = null;
+    let existingUserReview = null;
+    let hotelReviews = [];
+
+    async function initHotelPage() {
+      await initAuth();
+      renderNavigation('');
+      renderFooter();
+
+      // Parse Query Params from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      currentPlace = {
+        osm_type: urlParams.get('osm_type') || 'node',
+        osm_id: urlParams.get('osm_id') || '0',
+        name: urlParams.get('name') || 'Establishment',
+        lat: parseFloat(urlParams.get('lat')) || 18.5204,
+        lon: parseFloat(urlParams.get('lon')) || 73.8567,
+        category: urlParams.get('category') || 'restaurant',
+        address: urlParams.get('address') || 'Address not listed'
+      };
+
+      // Populate Header
+      document.getElementById('hotel-name').textContent = currentPlace.name;
+      document.getElementById('hotel-address').textContent = currentPlace.address;
+      document.getElementById('hotel-category-badge').textContent = currentPlace.category;
+      document.getElementById('hotel-osm-badge').textContent = `OSM ${currentPlace.osm_type}/${currentPlace.osm_id}`;
+      document.getElementById('get-directions-btn').href = getDirectionsUrl(currentPlace.lat, currentPlace.lon);
+
+      // Mini Map
+      const miniMap = L.map('mini-map', { zoomControl: false, attributionControl: false }).setView([currentPlace.lat, currentPlace.lon], 16);
+      // Standard 100% Free OpenStreetMap tile layer (no API key required)
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+        maxZoom: 19
+      }).addTo(miniMap);
+      L.marker([currentPlace.lat, currentPlace.lon]).addTo(miniMap);
+
+      // Ensure Hotel exists in DB
+      try {
+        dbHotelId = await getOrCreateDbHotel(currentPlace);
+        await loadReviews();
+      } catch (err) {
+        console.error('Error synchronizing hotel with database:', err);
+        showToast('Database connection note: ' + err.message, 'warning');
+      }
+
+      setupReviewForm();
+    }
+
+    async function loadReviews() {
+      if (!dbHotelId) return;
+
+      const container = document.getElementById('reviews-list-container');
+      try {
+        hotelReviews = await fetchHotelReviews(dbHotelId);
+        updateRatingStats(hotelReviews);
+
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+          existingUserReview = hotelReviews.find(r => r.user_id === currentUser.id);
+          if (existingUserReview) {
+            document.getElementById('user-existing-review-notice').style.display = 'block';
+            document.getElementById('post-review-btn').textContent = 'Update Review (No Extra Coins)';
+            document.getElementById('review-textarea').value = existingUserReview.review_text;
+            setRatingStars(existingUserReview.rating);
+          }
+        }
+
+        renderReviewsList(hotelReviews);
+      } catch (err) {
+        console.error('Error loading reviews:', err);
+        container.innerHTML = `
+          <div class="alert alert-error">Failed to load community reviews: ${escapeHTML(err.message)}</div>
+        `;
+      }
+    }
+
+    function updateRatingStats(reviews) {
+      const activeReviews = reviews.filter(r => !r.is_hidden);
+      const count = activeReviews.length;
+      document.getElementById('hotel-reviews-count').textContent = `${count} community ${count === 1 ? 'review' : 'reviews'}`;
+      document.getElementById('reviews-meta-count').textContent = `${count} total`;
+
+      if (count === 0) {
+        document.getElementById('hotel-avg-score').textContent = '0.0';
+        document.getElementById('hotel-avg-stars').innerHTML = '☆☆☆☆☆';
+        return;
+      }
+
+      const sum = activeReviews.reduce((acc, r) => acc + r.rating, 0);
+      const avg = (sum / count).toFixed(1);
+      document.getElementById('hotel-avg-score').textContent = avg;
+      document.getElementById('hotel-avg-stars').innerHTML = renderStarRating(avg);
+    }
+
+    function renderReviewsList(reviews) {
+      const container = document.getElementById('reviews-list-container');
+      const currentUser = getCurrentUser();
+
+      if (!reviews || reviews.length === 0) {
+        container.innerHTML = `
+          <div class="card" style="text-align: center; padding: var(--space-8); color: var(--text-muted);">
+            <div style="font-size: 2rem; margin-bottom: 8px;">🌟</div>
+            <h4>Be the first to review this place!</h4>
+            <p style="font-size: var(--font-size-sm); margin-top: 4px;">Share your experience and earn 10 FDA Coins immediately.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = reviews.map(r => {
+        const isMine = currentUser && currentUser.id === r.user_id;
+        const displayName = r.profiles?.display_name || r.profiles?.username || 'Reviewer';
+
+        return `
+          <div class="review-item ${r.is_hidden ? 'review-item-hidden' : ''}">
+            <div class="review-item-header">
+              <div>
+                <div class="reviewer-name">
+                  ${escapeHTML(displayName)}
+                  ${isMine ? '<span class="badge badge-lime" style="font-size:10px;margin-left:4px;">You</span>' : ''}
+                </div>
+                <div class="review-date">${formatDate(r.created_at)}</div>
+              </div>
+              <div style="display:flex; align-items:center; gap: 8px;">
+                ${renderStarRating(r.rating)}
+                ${!isMine ? `
+                  <button class="btn btn-secondary btn-sm report-btn" data-review-id="${r.id}" style="padding: 2px 6px; font-size:10px;" title="Report review">
+                    🚩
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+            <div class="review-body">
+              ${escapeHTML(r.review_text)}
+            </div>
+            ${r.is_hidden ? '<div style="font-size:11px; color:var(--status-warning); font-style:italic;">This review is currently hidden by admin moderation.</div>' : ''}
+          </div>
+        `;
+      }).join('');
+
+      // Attach report handlers
+      document.querySelectorAll('.report-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-review-id');
+          const reason = prompt('Please describe why you are flagging this review:');
+          if (reason) {
+            try {
+              await reportReview(id, reason);
+              showToast('Review flagged for administrative review.', 'success');
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          }
+        });
+      });
+    }
+
+    function setupReviewForm() {
+      const currentUser = getCurrentUser();
+      const authNotice = document.getElementById('review-auth-notice');
+      const form = document.getElementById('submit-review-form');
+      const charCounter = document.getElementById('char-counter');
+      const textarea = document.getElementById('review-textarea');
+      const submitBtn = document.getElementById('post-review-btn');
+
+      if (!currentUser) {
+        authNotice.style.display = 'block';
+        form.style.opacity = '0.5';
+        form.querySelectorAll('input, textarea, button').forEach(el => el.disabled = true);
+        return;
+      }
+
+      // Star Selector Interactive
+      const stars = document.querySelectorAll('.star-interactive');
+      stars.forEach(star => {
+        star.addEventListener('click', () => {
+          const val = parseInt(star.getAttribute('data-star'), 10);
+          setRatingStars(val);
+        });
+      });
+
+      // Character Counter
+      textarea.addEventListener('input', () => {
+        charCounter.textContent = `${textarea.value.length} / 1000`;
+      });
+
+      // Form Submit
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing...';
+
+        const rating = parseInt(document.getElementById('selected-rating').value, 10);
+        const reviewText = textarea.value;
+
+        try {
+          if (existingUserReview) {
+            // Edit Review RPC
+            await updateExistingReview(existingUserReview.id, rating, reviewText);
+            showToast('Review updated successfully!', 'success');
+          } else {
+            // New Review RPC -> Credits 10 Coins
+            const res = await submitNewReview(dbHotelId, rating, reviewText);
+            showToast('🎉 Review posted! You earned 10 FDA Coins!', 'success');
+          }
+
+          // Reload reviews and re-sync nav wallet
+          await loadReviews();
+          renderNavigation('');
+        } catch (err) {
+          console.error('Review submission error:', err);
+          showToast(err.message || 'Failed to submit review.', 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = existingUserReview ? 'Update Review (No Extra Coins)' : 'Submit Review & Earn 10 Coins';
+        }
+      });
+    }
+
+    function setRatingStars(val) {
+      document.getElementById('selected-rating').value = val;
+      document.querySelectorAll('.star-interactive').forEach(s => {
+        const starVal = parseInt(s.getAttribute('data-star'), 10);
+        if (starVal <= val) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', initHotelPage);
+  </script>
+</body>
+</html>

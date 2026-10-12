@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — FDAReview</title>
+  <meta name="description" content="Sign in to your FDAReview account to submit reviews, earn coins, and manage your wallet.">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div id="main-header"></div>
+
+  <main class="main-content auth-page-container">
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <div class="logo-badge" style="margin: 0 auto var(--space-3); width: 44px; height: 44px; font-size: 1.25rem;">FDA</div>
+        <h1 class="auth-card-title">Welcome Back</h1>
+        <p>Sign in to your account</p>
+      </div>
+
+      <div id="auth-alert" style="display:none;" class="alert alert-error"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="username-input">Username or Email</label>
+          <input type="text" id="username-input" class="form-input" placeholder="Enter username or email" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password-input">Password</label>
+          <div class="input-with-icon" style="position:relative;">
+            <input type="password" id="password-input" class="form-input" style="padding-right: 2.75rem;" placeholder="Enter password" required autocomplete="current-password">
+            <button type="button" id="toggle-password-btn" class="password-toggle-btn" aria-label="Toggle password visibility">
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="submit-login-btn" class="btn btn-primary btn-block btn-lg" style="margin-top: var(--space-4);">
+          Sign In
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: var(--space-6); font-size: var(--font-size-sm); color: var(--text-secondary);">
+        New to FDAReview? <a href="register.html">Create an account</a>
+      </div>
+      
+      <div style="text-align: center; margin-top: var(--space-4); font-size: 11px; color: var(--text-muted);">
+        Created by Aditya Thorat &bull; MIT CSN
+      </div>
+    </div>
+  </main>
+
+  <div id="main-footer"></div>
+
+  <script type="module">
+    import { initAuth, loginWithDemoAccount, getCurrentProfile } from './assets/js/auth.js';
+    import { renderNavigation, renderFooter } from './assets/js/navigation.js';
+    import { showToast } from './assets/js/ui.js';
+
+    async function initLoginPage() {
+      const { user } = await initAuth();
+      renderNavigation('login');
+      renderFooter();
+
+      // If already logged in, redirect
+      if (user) {
+        redirectUser();
+        return;
+      }
+
+      // Toggle Password Visibility
+      const toggleBtn = document.getElementById('toggle-password-btn');
+      const passInput = document.getElementById('password-input');
+      toggleBtn.addEventListener('click', () => {
+        if (passInput.type === 'password') {
+          passInput.type = 'text';
+          toggleBtn.textContent = '🔒';
+        } else {
+          passInput.type = 'password';
+          toggleBtn.textContent = '👁️';
+        }
+      });
+
+      // Handle Form Submit
+      const loginForm = document.getElementById('login-form');
+      const submitBtn = document.getElementById('submit-login-btn');
+      const alertBox = document.getElementById('auth-alert');
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alertBox.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Signing in...';
+
+        const username = document.getElementById('username-input').value.trim();
+        const password = document.getElementById('password-input').value;
+
+        try {
+          const result = await loginWithDemoAccount(username, password);
+          showToast(`Welcome back, ${result.profile?.display_name || 'Member'}!`, 'success');
+          
+          setTimeout(() => {
+            if (result.profile?.role === 'admin') {
+              window.location.href = 'admin.html';
+            } else {
+              window.location.href = 'index.html';
+            }
+          }, 800);
+        } catch (err) {
+          console.error('Login error:', err);
+          alertBox.textContent = err.message || 'Invalid username or password. Please verify your credentials.';
+          alertBox.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign In';
+        }
+      });
+    }
+
+    function redirectUser() {
+      const profile = getCurrentProfile();
+      if (profile?.role === 'admin') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'index.html';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initLoginPage);
+  </script>
+</body>
+</html>

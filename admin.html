@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — FDAReview</title>
+  <meta name="description" content="Administrative control center for FDAReview: system metrics, review moderation, user audit, and redemption management.">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div id="main-header"></div>
+
+  <main class="main-content container">
+    <div style="margin-top: var(--space-8); margin-bottom: var(--space-4); display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:var(--space-4);">
+      <div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <h1>Admin Control Center</h1>
+          <span class="badge badge-warning" style="font-weight:bold;">MITADMIN HQ</span>
+        </div>
+        <p>Manage community reviews, process simulated redemptions, and inspect system audit ledgers.</p>
+      </div>
+      <div>
+        <button id="refresh-admin-btn" class="btn btn-secondary btn-sm">
+          🔄 Refresh Metrics
+        </button>
+      </div>
+    </div>
+
+    <!-- Overview Stats Grid -->
+    <section class="admin-stats-grid">
+      <div class="admin-stat-card">
+        <div class="admin-stat-label">Registered Users</div>
+        <div class="admin-stat-number" id="stat-users">0</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-label">Mapped Establishments</div>
+        <div class="admin-stat-number" id="stat-hotels">0</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-label">Total Community Reviews</div>
+        <div class="admin-stat-number" id="stat-reviews">0</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-label">Coins Awarded in Ledger</div>
+        <div class="admin-stat-number" id="stat-coins">0</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-label">Pending Redemptions</div>
+        <div class="admin-stat-number" id="stat-pending" style="color:var(--status-warning);">0</div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" data-tab="redemptions">Redemption Requests</button>
+      <button class="admin-tab-btn" data-tab="reviews">Review Moderation</button>
+      <button class="admin-tab-btn" data-tab="users">User Accounts & Wallets</button>
+    </div>
+
+    <!-- TAB 1: Redemptions Management -->
+    <section id="tab-redemptions" class="tab-pane">
+      <div class="card-header">
+        <h2 style="font-size: var(--font-size-xl);">Pending & Settled Redemptions</h2>
+        <span class="badge badge-info" id="admin-redemptions-count">0 items</span>
+      </div>
+
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>User</th>
+              <th>Coins</th>
+              <th>Simulated INR</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-redemptions-tbody">
+            <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Loading requests...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 2: Review Moderation -->
+    <section id="tab-reviews" class="tab-pane" style="display:none;">
+      <div class="card-header">
+        <h2 style="font-size: var(--font-size-xl);">Community Reviews Moderation</h2>
+        <span class="badge badge-info" id="admin-reviews-count">0 reviews</span>
+      </div>
+
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Establishment</th>
+              <th>Author</th>
+              <th>Rating</th>
+              <th>Review Text</th>
+              <th>Status</th>
+              <th>Moderation</th>
+            </tr>
+          </thead>
+          <tbody id="admin-reviews-tbody">
+            <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Loading reviews...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 3: User Management -->
+    <section id="tab-users" class="tab-pane" style="display:none; margin-bottom: var(--space-12);">
+      <div class="card-header">
+        <h2 style="font-size: var(--font-size-xl);">Registered User Accounts</h2>
+        <span class="badge badge-info">Active System Accounts</span>
+      </div>
+
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Display Name</th>
+              <th>Role</th>
+              <th>Wallet Balance</th>
+              <th>Balance Adjustment</th>
+            </tr>
+          </thead>
+          <tbody id="admin-users-tbody">
+            <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Loading users...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="main-footer"></div>
+
+  <script type="module">
+    import { initAuth, isAdmin, getCurrentUser } from './assets/js/auth.js';
+    import { renderNavigation, renderFooter } from './assets/js/navigation.js';
+    import { 
+      fetchAdminOverviewStats, 
+      fetchAdminRedemptions, 
+      processRedemptionRequest, 
+      fetchAdminReviews, 
+      moderateReviewStatus, 
+      fetchAdminUsers, 
+      adjustUserWalletBalance 
+    } from './assets/js/admin.js';
+    import { showToast, escapeHTML, formatCoins, formatDateTime, renderStarRating } from './assets/js/ui.js';
+
+    async function initAdminPage() {
+      const { user, profile } = await initAuth();
+      renderNavigation('admin');
+      renderFooter();
+
+      // Authorization guard: mitadmin role strictly verified
+      if (!user || profile?.role !== 'admin') {
+        alert('Access Denied: Only mitadmin has access to administrative controls.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      setupTabs();
+      await loadAllAdminData();
+
+      document.getElementById('refresh-admin-btn').addEventListener('click', loadAllAdminData);
+    }
+
+    function setupTabs() {
+      const tabBtns = document.querySelectorAll('.admin-tab-btn');
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const target = btn.getAttribute('data-tab');
+          document.querySelectorAll('.tab-pane').forEach(pane => pane.style.display = 'none');
+          document.getElementById(`tab-${target}`).style.display = 'block';
+        });
+      });
+    }
+
+    async function loadAllAdminData() {
+      showToast('Refreshing admin datasets...', 'info');
+      try {
+        const stats = await fetchAdminOverviewStats();
+        document.getElementById('stat-users').textContent = stats.totalUsers;
+        document.getElementById('stat-hotels').textContent = stats.totalHotels;
+        document.getElementById('stat-reviews').textContent = stats.totalReviews;
+        document.getElementById('stat-coins').textContent = formatCoins(stats.totalCoinsIssued);
+        document.getElementById('stat-pending').textContent = stats.pendingRedemptions;
+
+        await Promise.all([
+          loadRedemptions(),
+          loadReviews(),
+          loadUsers()
+        ]);
+        showToast('Admin data up to date!', 'success');
+      } catch (err) {
+        console.error('Error loading admin overview:', err);
+        showToast('Admin query failed: ' + err.message, 'error');
+      }
+    }
+
+    async function loadRedemptions() {
+      const tbody = document.getElementById('admin-redemptions-tbody');
+      const redemptions = await fetchAdminRedemptions();
+      document.getElementById('admin-redemptions-count').textContent = `${redemptions.length} requests`;
+
+      if (!redemptions || redemptions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No redemptions submitted.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = redemptions.map(r => {
+        const isPending = r.status === 'pending';
+        let statusBadge = 'badge-warning';
+        if (r.status === 'approved') statusBadge = 'badge-success';
+        if (r.status === 'rejected') statusBadge = 'badge-error';
+
+        return `
+          <tr>
+            <td style="font-size:12px;">${formatDateTime(r.created_at)}</td>
+            <td><strong>${escapeHTML(r.profiles?.display_name || r.profiles?.username || 'User')}</strong></td>
+            <td>${formatCoins(r.requested_coins)}</td>
+            <td style="color:var(--accent-primary); font-weight:bold;">₹${r.illustrative_amount_inr}</td>
+            <td><span class="badge ${statusBadge}">${escapeHTML(r.status)}</span></td>
+            <td>
+              ${isPending ? `
+                <div style="display:flex; gap:6px;">
+                  <button class="btn btn-primary btn-sm admin-approve-btn" data-id="${r.id}" style="padding:2px 8px; font-size:11px;">
+                    Approve
+                  </button>
+                  <button class="btn btn-danger btn-sm admin-reject-btn" data-id="${r.id}" style="padding:2px 8px; font-size:11px;">
+                    Reject
+                  </button>
+                </div>
+              ` : `
+                <span style="font-size:11px; color:var(--text-muted);">${escapeHTML(r.admin_note || 'Resolved')}</span>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Attach Approve / Reject Handlers
+      document.querySelectorAll('.admin-approve-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          const note = prompt('Optional approval note for simulated settlement:') || 'Approved by administrator';
+          try {
+            await processRedemptionRequest(id, 'approved', note);
+            showToast('Simulated redemption approved!', 'success');
+            await loadAllAdminData();
+          } catch (e) {
+            showToast(e.message, 'error');
+          }
+        });
+      });
+
+      document.querySelectorAll('.admin-reject-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          const note = prompt('Reason for rejection (reserved coins will be returned):') || 'Rejected by administrator';
+          try {
+            await processRedemptionRequest(id, 'rejected', note);
+            showToast('Redemption rejected. Reserved coins returned to user.', 'warning');
+            await loadAllAdminData();
+          } catch (e) {
+            showToast(e.message, 'error');
+          }
+        });
+      });
+    }
+
+    async function loadReviews() {
+      const tbody = document.getElementById('admin-reviews-tbody');
+      const reviews = await fetchAdminReviews();
+      document.getElementById('admin-reviews-count').textContent = `${reviews.length} reviews`;
+
+      if (!reviews || reviews.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No reviews in database.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = reviews.map(r => {
+        const isHidden = r.is_hidden;
+
+        return `
+          <tr>
+            <td style="font-size:11px; color:var(--text-muted);">${formatDateTime(r.created_at)}</td>
+            <td><strong>${escapeHTML(r.hotels?.name || 'Place')}</strong></td>
+            <td>${escapeHTML(r.profiles?.display_name || r.profiles?.username || 'User')}</td>
+            <td>${renderStarRating(r.rating)}</td>
+            <td style="max-width:280px; font-size:12px; line-height:1.4;">${escapeHTML(r.review_text)}</td>
+            <td>
+              <span class="badge ${isHidden ? 'badge-error' : 'badge-success'}">
+                ${isHidden ? 'Hidden' : 'Visible'}
+              </span>
+            </td>
+            <td>
+              ${isHidden ? `
+                <button class="btn btn-secondary btn-sm admin-mod-btn" data-id="${r.id}" data-action="restored" style="padding:2px 6px; font-size:11px;">
+                  Restore
+                </button>
+              ` : `
+                <button class="btn btn-danger btn-sm admin-mod-btn" data-id="${r.id}" data-action="hidden" style="padding:2px 6px; font-size:11px;">
+                  Hide Review
+                </button>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.admin-mod-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          const action = btn.getAttribute('data-action');
+          const reason = prompt(`Reason for setting review to ${action}:`) || 'Administrative moderation';
+          try {
+            await moderateReviewStatus(id, action, reason);
+            showToast(`Review status updated to ${action}!`, 'success');
+            await loadReviews();
+          } catch (e) {
+            showToast(e.message, 'error');
+          }
+        });
+      });
+    }
+
+    async function loadUsers() {
+      const tbody = document.getElementById('admin-users-tbody');
+      const users = await fetchAdminUsers();
+
+      tbody.innerHTML = users.map(u => {
+        const balance = u.wallets ? u.wallets.balance_coins : 0;
+        return `
+          <tr>
+            <td><code>${escapeHTML(u.username)}</code></td>
+            <td>${escapeHTML(u.display_name)}</td>
+            <td><span class="badge ${u.role === 'admin' ? 'badge-warning' : 'badge-lime'}">${u.role}</span></td>
+            <td style="font-weight:bold; color:var(--accent-primary);">${formatCoins(balance)} Coins</td>
+            <td>
+              <button class="btn btn-secondary btn-sm admin-adjust-btn" data-id="${u.id}" data-user="${escapeHTML(u.display_name)}" style="font-size:11px; padding:2px 8px;">
+                Adjust Coins
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.admin-adjust-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.getAttribute('data-id');
+          const userName = btn.getAttribute('data-user');
+          const amountStr = prompt(`Enter coin adjustment amount for ${userName} (e.g. 50 to add, -20 to deduct):`);
+          if (!amountStr) return;
+          const amount = parseInt(amountStr, 10);
+          if (isNaN(amount) || amount === 0) return alert('Invalid coin amount');
+
+          const reason = prompt('Reason for this administrative ledger adjustment:') || 'Demo adjustment';
+          try {
+            await adjustUserWalletBalance(userId, amount, reason);
+            showToast(`Adjusted ${userName}'s balance by ${amount} coins.`, 'success');
+            await loadUsers();
+            await loadAllAdminData();
+          } catch (e) {
+            showToast(e.message, 'error');
+          }
+        });
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', initAdminPage);
+  </script>
+</body>
+</html>

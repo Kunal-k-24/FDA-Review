@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile & My Reviews — FDAReview</title>
+  <meta name="description" content="View your profile details, coin balance, and history of submitted reviews.">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div id="main-header"></div>
+
+  <main class="main-content container">
+    <div style="margin-top: var(--space-8); margin-bottom: var(--space-6);">
+      <h1>User Profile & Activity</h1>
+      <p>Manage your display details and view your review contributions.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 340px 1fr; gap: var(--space-8); margin-bottom: var(--space-12);" id="profile-grid">
+      <!-- Profile Card -->
+      <aside>
+        <div class="card" style="text-align: center;">
+          <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--accent-primary); color: #000; font-size: 2rem; font-weight: 800; display:flex; align-items:center; justify-content:center; margin: 0 auto var(--space-4);" id="profile-avatar">
+            U
+          </div>
+          <h2 style="font-size: var(--font-size-xl); margin-bottom: var(--space-1);" id="profile-name">Loading...</h2>
+          <div style="color: var(--text-muted); font-size: var(--font-size-sm); margin-bottom: var(--space-3);" id="profile-username">@username</div>
+          <div>
+            <span class="badge badge-lime" id="profile-role-badge">User</span>
+          </div>
+
+          <div style="margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--border-subtle); display:flex; justify-content:space-around;">
+            <div>
+              <div style="font-size: var(--font-size-2xl); font-weight:800; color:var(--accent-primary);" id="profile-coins-stat">0</div>
+              <div style="font-size: 11px; color: var(--text-muted);">FDA COINS</div>
+            </div>
+            <div>
+              <div style="font-size: var(--font-size-2xl); font-weight:800; color:var(--text-primary);" id="profile-reviews-stat">0</div>
+              <div style="font-size: 11px; color: var(--text-muted);">REVIEWS</div>
+            </div>
+          </div>
+
+          <div style="margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--border-subtle); text-align: left;">
+            <form id="edit-profile-form">
+              <div class="form-group">
+                <label class="form-label" for="edit-display-name">Edit Display Name</label>
+                <input type="text" id="edit-display-name" class="form-input" required>
+              </div>
+              <button type="submit" id="save-profile-btn" class="btn btn-secondary btn-block btn-sm">
+                Save Display Name
+              </button>
+            </form>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Review History -->
+      <div>
+        <div class="card-header">
+          <h2 style="font-size: var(--font-size-xl);">My Submitted Reviews</h2>
+          <span id="my-reviews-count" class="badge" style="background:var(--bg-card);color:var(--text-muted);">0 total</span>
+        </div>
+
+        <div id="user-reviews-container">
+          <div class="skeleton" style="height: 100px; margin-bottom: var(--space-4);"></div>
+          <div class="skeleton" style="height: 100px; margin-bottom: var(--space-4);"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="main-footer"></div>
+
+  <script type="module">
+    import { initAuth, getCurrentUser, getCurrentProfile, getCurrentWallet } from './assets/js/auth.js';
+    import { renderNavigation, renderFooter } from './assets/js/navigation.js';
+    import { supabase } from './assets/js/supabase-client.js';
+    import { showToast, escapeHTML, formatDate, renderStarRating, formatCoins } from './assets/js/ui.js';
+
+    async function initProfilePage() {
+      const { user, profile, wallet } = await initAuth();
+      renderNavigation('profile');
+      renderFooter();
+
+      if (!user) {
+        showToast('Please sign in to view your profile', 'warning');
+        setTimeout(() => window.location.href = 'login.html', 1000);
+        return;
+      }
+
+      // Populate Profile Details
+      document.getElementById('profile-avatar').textContent = (profile?.display_name || user.email || 'U')[0].toUpperCase();
+      document.getElementById('profile-name').textContent = profile?.display_name || 'User';
+      document.getElementById('profile-username').textContent = `@${profile?.username || user.email}`;
+      document.getElementById('profile-role-badge').textContent = profile?.role === 'admin' ? 'Administrator' : 'Verified Reviewer';
+      document.getElementById('edit-display-name').value = profile?.display_name || '';
+      document.getElementById('profile-coins-stat').textContent = formatCoins(wallet?.balance_coins || 0);
+
+      // Load User Reviews
+      await loadUserReviews(user.id);
+
+      // Profile Update Listener
+      document.getElementById('edit-profile-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newName = document.getElementById('edit-display-name').value.trim();
+        if (!newName) return;
+
+        const btn = document.getElementById('save-profile-btn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        const { error } = await supabase
+          .from('profiles')
+          .update({ display_name: newName, updated_at: new Date().toISOString() })
+          .eq('id', user.id);
+
+        if (error) {
+          showToast(error.message, 'error');
+        } else {
+          showToast('Display name updated!', 'success');
+          document.getElementById('profile-name').textContent = newName;
+          renderNavigation('profile');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Save Display Name';
+      });
+    }
+
+    async function loadUserReviews(userId) {
+      const container = document.getElementById('user-reviews-container');
+
+      try {
+        const { data: reviews, error } = await supabase
+          .from('reviews')
+          .select(`
+            id,
+            rating,
+            review_text,
+            created_at,
+            is_hidden,
+            hotels:hotel_id (
+              id,
+              name,
+              category,
+              address,
+              osm_type,
+              osm_id,
+              latitude,
+              longitude
+            )
+          `)
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        document.getElementById('profile-reviews-stat').textContent = reviews.length;
+        document.getElementById('my-reviews-count').textContent = `${reviews.length} reviews`;
+
+        if (!reviews || reviews.length === 0) {
+          container.innerHTML = `
+            <div class="card" style="text-align: center; padding: var(--space-8); color: var(--text-muted);">
+              <div style="font-size: 2rem; margin-bottom: 8px;">📝</div>
+              <h4>You haven't posted any reviews yet.</h4>
+              <p style="font-size: var(--font-size-sm); margin-top: 4px;">Search for places on the Explore map and post reviews to earn 10 FDA Coins each!</p>
+              <a href="index.html" class="btn btn-primary btn-sm" style="margin-top: var(--space-4);">Explore Places</a>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = reviews.map(r => {
+          const hotel = r.hotels || {};
+          const queryParams = new URLSearchParams({
+            osm_type: hotel.osm_type || 'node',
+            osm_id: hotel.osm_id || '0',
+            name: hotel.name || 'Place',
+            lat: hotel.latitude || 18.5204,
+            lon: hotel.longitude || 73.8567,
+            category: hotel.category || 'place',
+            address: hotel.address || ''
+          }).toString();
+
+          return `
+            <div class="review-item">
+              <div class="review-item-header">
+                <div>
+                  <h4 style="font-size: var(--font-size-base); margin-bottom: 2px;">
+                    <a href="hotel.html?${queryParams}" style="color:var(--text-primary);">${escapeHTML(hotel.name || 'Establishment')}</a>
+                  </h4>
+                  <div class="review-date">${formatDate(r.created_at)} &bull; ${escapeHTML(hotel.address || 'Local area')}</div>
+                </div>
+                <div>
+                  ${renderStarRating(r.rating)}
+                </div>
+              </div>
+              <div class="review-body">${escapeHTML(r.review_text)}</div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top: var(--space-2); font-size:12px;">
+                <span class="badge badge-lime">+10 Coins Earned</span>
+                <a href="hotel.html?${queryParams}" class="btn btn-secondary btn-sm" style="font-size:11px; padding:2px 8px;">Edit Review</a>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Failed to load user reviews:', err);
+        container.innerHTML = `<div class="alert alert-error">Failed to load reviews: ${escapeHTML(err.message)}</div>`;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initProfilePage);
+  </script>
+</body>
+</html>

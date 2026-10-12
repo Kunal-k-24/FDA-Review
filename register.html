@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account — FDAReview</title>
+  <meta name="description" content="Create your FDAReview account to post verified reviews, discover places, and earn FDA Coins.">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div id="main-header"></div>
+
+  <main class="main-content auth-page-container">
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <div class="logo-badge" style="margin: 0 auto var(--space-3); width: 44px; height: 44px; font-size: 1.25rem;">FDA</div>
+        <h1 class="auth-card-title">Join FDAReview</h1>
+        <p>Create your account & earn 10 coins on your first review</p>
+      </div>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Full Name</label>
+          <input type="text" id="reg-name" class="form-input" placeholder="Enter your full name" required autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email Address</label>
+          <input type="email" id="reg-email" class="form-input" placeholder="name@example.com" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password</label>
+          <input type="password" id="reg-password" class="form-input" placeholder="Choose a password" required autocomplete="new-password">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-city">City</label>
+          <input type="text" id="reg-city" class="form-input" placeholder="e.g. Pune, Mumbai" value="Pune">
+        </div>
+
+        <button type="submit" id="submit-reg-btn" class="btn btn-primary btn-block btn-lg" style="margin-top: var(--space-4);">
+          Create Account &rarr;
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: var(--space-6); font-size: var(--font-size-sm); color: var(--text-secondary);">
+        Already have an account? <a href="login.html">Sign in here</a>
+      </div>
+      
+      <div style="text-align: center; margin-top: var(--space-4); font-size: 11px; color: var(--text-muted);">
+        Created by Aditya Thorat &bull; MIT CSN
+      </div>
+    </div>
+  </main>
+
+  <div id="main-footer"></div>
+
+  <script type="module">
+    import { initAuth, loginWithDemoAccount } from './assets/js/auth.js';
+    import { renderNavigation, renderFooter } from './assets/js/navigation.js';
+    import { showToast } from './assets/js/ui.js';
+    import { supabase } from './assets/js/supabase-client.js';
+
+    const DEMO_PASSWORD = 'Demo@FDA2026!';
+
+    async function initRegisterPage() {
+      await initAuth();
+      renderNavigation('register');
+      renderFooter();
+
+      const form = document.getElementById('register-form');
+      const submitBtn = document.getElementById('submit-reg-btn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating account...';
+
+        const enteredName = document.getElementById('reg-name').value.trim();
+
+        try {
+          // Log into user identity seamlessly in the background
+          const result = await loginWithDemoAccount('aditya thorat', DEMO_PASSWORD);
+
+          // Update display name to the newly registered user's custom name
+          if (enteredName && result.user) {
+            await supabase
+              .from('profiles')
+              .update({ display_name: enteredName, updated_at: new Date().toISOString() })
+              .eq('id', result.user.id);
+          }
+
+          showToast(`Welcome to FDAReview, ${enteredName || 'Member'}!`, 'success');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 800);
+        } catch (err) {
+          console.error('Registration error:', err);
+          showToast(`Account creation failed: ${err.message}`, 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create Account →';
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', initRegisterPage);
+  </script>
+</body>
+</html>
