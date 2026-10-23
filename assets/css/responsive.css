@@ -142,4 +142,54 @@
     flex-direction: column;
     text-align: center;
   }
+
+  /* Questionnaire responsive */
+  .q-progress-line {
+    width: 28px;
+  }
+
+  .q-progress-dot {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .q-progress-label {
+    font-size: 9px;
+    top: 34px;
+  }
+
+  .q-star-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .q-star-selector {
+    align-self: flex-start;
+  }
+
+  .q-star {
+    font-size: 1.5rem;
+  }
+
+  .q-nav-buttons {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .q-nav-buttons .btn {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .review-breakdown {
+    grid-template-columns: 1fr;
+  }
+
+  .q-computed-preview {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-2);
+  }
 }

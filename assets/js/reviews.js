@@ -105,3 +105,45 @@ export async function reportReview(reviewId, reason) {
   if (error) throw error;
   return data;
 }
+
+/**
+ * Submits a full questionnaire-based review.
+ * The RPC computes the star rating automatically from 9 numeric questions (average → round).
+ */
+export async function submitQuestionnaireReview(hotelId, answers) {
+  const { data, error } = await supabase.rpc('submit_questionnaire_review', {
+    p_hotel_id: hotelId,
+    p_visit_frequency: answers.visit_frequency,
+    p_preferred_type: answers.preferred_type,
+    p_food_quality: answers.food_quality,
+    p_food_taste: answers.food_taste,
+    p_food_freshness: answers.food_freshness,
+    p_menu_variety: answers.menu_variety,
+    p_cleanliness: answers.cleanliness,
+    p_staff_behaviour: answers.staff_behaviour,
+    p_speed_of_service: answers.speed_of_service,
+    p_ambience: answers.ambience,
+    p_value_for_money: answers.value_for_money,
+    p_would_visit_again: answers.would_visit_again,
+    p_liked_most: answers.liked_most,
+    p_improvement: answers.improvement || '',
+    p_favourite_dish: answers.favourite_dish || ''
+  });
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Fetch questionnaire response for a specific hotel + user (for display on review cards).
+ */
+export async function fetchQuestionnaireByHotel(hotelId) {
+  const { data, error } = await supabase
+    .from('questionnaire_responses')
+    .select('*')
+    .eq('hotel_id', hotelId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}

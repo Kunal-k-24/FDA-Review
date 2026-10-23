@@ -392,6 +392,448 @@
   line-height: 1.6;
 }
 
+/* --- QUESTIONNAIRE MULTI-STEP FORM --- */
+
+/* Step Progress Indicator */
+.q-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: var(--space-6);
+  padding: 0 var(--space-2);
+}
+
+.q-progress-step {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.q-progress-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  border: 2px solid var(--border-default);
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  transition: all var(--transition-normal);
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.q-progress-dot.active {
+  border-color: var(--accent-primary);
+  background: var(--accent-dim-strong);
+  color: var(--accent-primary);
+  box-shadow: 0 0 12px rgba(184, 243, 107, 0.25);
+}
+
+.q-progress-dot.completed {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+}
+
+.q-progress-line {
+  height: 2px;
+  width: 48px;
+  background: var(--border-default);
+  transition: background var(--transition-normal);
+  flex-shrink: 0;
+}
+
+.q-progress-line.completed {
+  background: var(--accent-primary);
+}
+
+.q-progress-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  position: absolute;
+  top: 38px;
+  white-space: nowrap;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-fast);
+}
+
+.q-progress-dot.active .q-progress-label,
+.q-progress-dot.completed .q-progress-label {
+  color: var(--accent-primary);
+}
+
+/* Steps Container */
+.q-steps-container {
+  position: relative;
+  overflow: hidden;
+  min-height: 240px;
+}
+
+.q-step {
+  display: none;
+  flex-direction: column;
+  gap: var(--space-5);
+  animation: qStepFadeIn 0.35s ease forwards;
+}
+
+.q-step.active {
+  display: flex;
+}
+
+@keyframes qStepFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section Headers */
+.q-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.q-section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.q-section-title .q-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent-primary);
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+/* Option Chips for Multiple Choice Questions */
+.q-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.q-option-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.5rem 0.9rem;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.q-option-chip:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--accent-dim);
+}
+
+.q-option-chip.selected {
+  border-color: var(--accent-primary);
+  background: var(--accent-dim-strong);
+  color: var(--accent-primary);
+  box-shadow: 0 0 8px rgba(184, 243, 107, 0.15);
+}
+
+/* Star Row for Rating Questions */
+.q-star-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  gap: var(--space-3);
+}
+
+.q-star-row:hover {
+  border-color: var(--border-default);
+  background: var(--bg-surface);
+}
+
+.q-star-row-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.q-star-row-label .q-icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.q-star-selector {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.q-star {
+  font-size: 1.35rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color var(--transition-fast), transform var(--transition-fast);
+  user-select: none;
+  line-height: 1;
+}
+
+.q-star:hover {
+  transform: scale(1.2);
+}
+
+.q-star.active {
+  color: #FCC419;
+  text-shadow: 0 0 6px rgba(252, 196, 25, 0.4);
+}
+
+/* Live Computed Rating Preview */
+.q-computed-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  margin-top: var(--space-3);
+  background: linear-gradient(135deg, var(--bg-surface), var(--bg-card));
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-accent);
+}
+
+.q-computed-score {
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  color: #FCC419;
+  line-height: 1;
+  transition: all var(--transition-fast);
+}
+
+.q-computed-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.q-computed-stars {
+  font-size: var(--font-size-base);
+}
+
+.q-computed-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Free Text Inputs for Questionnaire */
+.q-textarea {
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.q-textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.q-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.q-text-input {
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 1rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  width: 100%;
+}
+
+.q-text-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.q-text-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Navigation Buttons */
+.q-nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.q-nav-buttons .btn {
+  min-width: 120px;
+}
+
+/* Step Heading */
+.q-step-heading {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.q-step-subheading {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+/* Already Reviewed Notice */
+.q-already-reviewed {
+  text-align: center;
+  padding: var(--space-6);
+  color: var(--text-muted);
+}
+
+.q-already-reviewed .q-check-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-3);
+  display: block;
+}
+
+.q-already-reviewed h4 {
+  color: var(--accent-primary);
+  margin-bottom: var(--space-2);
+}
+
+/* Review Card Breakdown */
+.review-breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  margin-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.review-breakdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 3px 0;
+}
+
+.review-breakdown-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.review-breakdown-stars {
+  display: flex;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.review-breakdown-stars .star-mini {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.review-breakdown-stars .star-mini.filled {
+  color: #FCC419;
+}
+
+.review-breakdown-toggle {
+  background: none;
+  border: none;
+  color: var(--accent-primary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  padding: var(--space-1) 0;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.review-breakdown-toggle:hover {
+  color: var(--accent-hover);
+}
+
+/* Review extra details */
+.review-extra-details {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  margin-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--font-size-xs);
+}
+
+.review-extra-item {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.review-extra-label {
+  color: var(--text-muted);
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+.review-extra-value {
+  color: var(--text-secondary);
+}
+
 /* --- WALLET & REDEMPTION PAGE --- */
 .wallet-hero {
   display: grid;

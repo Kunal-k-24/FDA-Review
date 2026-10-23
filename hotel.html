@@ -84,7 +84,7 @@
           <div id="mini-map" style="height: 180px; border-radius: var(--radius-md); overflow: hidden;"></div>
         </div>
 
-        <!-- Review Form Card -->
+        <!-- Questionnaire Review Form Card -->
         <div class="card" id="review-form-card">
           <div class="card-header">
             <h3 style="font-size: var(--font-size-lg);" id="form-card-title">Share Your Experience</h3>
@@ -99,34 +99,268 @@
 
           <div id="user-existing-review-notice" class="alert alert-info" style="display:none;">
             <div>
-              You already reviewed this place! Submitting below will <strong>edit your existing review</strong> (per system rules, edits do not award duplicate coins).
+              ✅ You've already reviewed this place! Your questionnaire response is recorded.
             </div>
           </div>
 
           <form id="submit-review-form">
-            <div class="form-group">
-              <label class="form-label">Your Rating (1 to 5 Stars)</label>
-              <div id="star-selector" style="display:flex; gap: 8px; font-size: 1.75rem;">
-                <span class="star-interactive" data-star="1">★</span>
-                <span class="star-interactive" data-star="2">★</span>
-                <span class="star-interactive" data-star="3">★</span>
-                <span class="star-interactive" data-star="4">★</span>
-                <span class="star-interactive" data-star="5">★</span>
+            <!-- Step Progress Indicator -->
+            <div class="q-progress" id="q-progress">
+              <div class="q-progress-step">
+                <div class="q-progress-dot active" data-step="1">
+                  1
+                  <span class="q-progress-label">Preferences</span>
+                </div>
               </div>
-              <input type="hidden" id="selected-rating" value="5">
+              <div class="q-progress-line" data-line="1"></div>
+              <div class="q-progress-step">
+                <div class="q-progress-dot" data-step="2">
+                  2
+                  <span class="q-progress-label">Ratings</span>
+                </div>
+              </div>
+              <div class="q-progress-line" data-line="2"></div>
+              <div class="q-progress-step">
+                <div class="q-progress-dot" data-step="3">
+                  3
+                  <span class="q-progress-label">Feedback</span>
+                </div>
+              </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="review-textarea">
-                <span>Written Review</span>
-                <span id="char-counter" style="color:var(--text-muted); font-size: 11px;">0 / 1000</span>
-              </label>
-              <textarea id="review-textarea" class="form-textarea" placeholder="Describe the ambiance, food taste, cleanliness, or hospitality (min 10 characters)..." maxlength="1000" required></textarea>
-            </div>
+            <!-- ========== STEP 1: Preferences (Q1 & Q2) ========== -->
+            <div class="q-steps-container">
+              <div class="q-step active" id="q-step-1">
+                <div class="q-step-heading">🍽️ Your Dining Preferences</div>
+                <div class="q-step-subheading">Help us understand your restaurant habits</div>
 
-            <button type="submit" id="post-review-btn" class="btn btn-primary btn-block btn-lg">
-              Submit Review & Earn 10 Coins
-            </button>
+                <!-- Q1: Visit Frequency -->
+                <div class="q-section">
+                  <div class="q-section-title">
+                    <span class="q-num">1</span> How often do you visit restaurants?
+                  </div>
+                  <div class="q-options" id="q-visit-frequency">
+                    <span class="q-option-chip" data-value="Rarely">🕐 Rarely</span>
+                    <span class="q-option-chip" data-value="Once a month">📅 Once a month</span>
+                    <span class="q-option-chip" data-value="2-3 times a month">🗓️ 2-3 times a month</span>
+                    <span class="q-option-chip" data-value="Weekly">📆 Weekly</span>
+                    <span class="q-option-chip" data-value="More than once a week">🔥 More than once a week</span>
+                  </div>
+                </div>
+
+                <!-- Q2: Preferred Type -->
+                <div class="q-section">
+                  <div class="q-section-title">
+                    <span class="q-num">2</span> What type of restaurant do you usually prefer?
+                  </div>
+                  <div class="q-options" id="q-preferred-type">
+                    <span class="q-option-chip" data-value="Fast Food">🍔 Fast Food</span>
+                    <span class="q-option-chip" data-value="Family Restaurant">👨‍👩‍👧‍👦 Family Restaurant</span>
+                    <span class="q-option-chip" data-value="Café">☕ Café</span>
+                    <span class="q-option-chip" data-value="Fine Dining">🥂 Fine Dining</span>
+                    <span class="q-option-chip" data-value="Other">✨ Other</span>
+                  </div>
+                </div>
+
+                <div class="q-nav-buttons">
+                  <div></div>
+                  <button type="button" class="btn btn-primary" id="q-next-1">
+                    Next: Rate Your Experience →
+                  </button>
+                </div>
+              </div>
+
+              <!-- ========== STEP 2: Ratings (Q3-Q11) ========== -->
+              <div class="q-step" id="q-step-2">
+                <div class="q-step-heading">⭐ Rate Your Experience</div>
+                <div class="q-step-subheading">Tap the stars (1-5) for each category</div>
+
+                <!-- Q3: Food Quality -->
+                <div class="q-star-row" data-rating-key="food_quality">
+                  <div class="q-star-row-label"><span class="q-icon">🍽️</span> Food Quality</div>
+                  <div class="q-star-selector">
+                    <span class="q-star" data-star="1">★</span>
+                    <span class="q-star" data-star="2">★</span>
+                    <span class="q-star" data-star="3">★</span>
+                    <span class="q-star" data-star="4">★</span>
+                    <span class="q-star" data-star="5">★</span>
+                  </div>
+                </div>
+
+                <!-- Q4: Food Taste -->
+                <div class="q-star-row" data-rating-key="food_taste">
+                  <div class="q-star-row-label"><span class="q-icon">😋</span> Food Taste</div>
+                  <div class="q-star-selector">
+                    <span class="q-star" data-star="1">★</span>
+                    <span class="q-star" data-star="2">★</span>
+                    <span class="q-star" data-star="3">★</span>
+                    <span class="q-star" data-star="4">★</span>
+                    <span class="q-star" data-star="5">★</span>
+                  </div>
+                </div>
+
+                <!-- Q5: Food Freshness -->
+                <div class="q-star-row" data-rating-key="food_freshness">
+                  <div class="q-star-row-label"><span class="q-icon">🥬</span> Food Freshness</div>
+                  <div class="q-star-selector">
+                    <span class="q-star" data-star="1">★</span>
+                    <span class="q-star" data-star="2">★</span>
+                    <span class="q-star" data-star="3">★</span>
+                    <span class="q-star" data-star="4">★</span>
+                    <span class="q-star" data-star="5">★</span>
+                  </div>
+                </div>
+
+                <!-- Q6: Menu Variety -->
+                <div class="q-star-row" data-rating-key="menu_variety">
+                  <div class="q-star-row-label"><span class="q-icon">📋</span> Menu Variety</div>
+                  <div class="q-star-selector">
+                    <span class="q-star" data-star="1">★</span>
+                    <span class="q-star" data-star="2">★</span>
+                    <span class="q-star" data-star="3">★</span>
+                    <span class="q-star" data-star="4">★</span>
+                    <span class="q-star" data-star="5">★</span>
+                  </div>
+                </div>
+
+                <!-- Q7: Cleanliness -->
+                <div class="q-star-row" data-rating-key="cleanliness">
+                  <div class="q-star-row-label"><span class="q-icon">🧹</span> Cleanliness</div>
+                  <div class="q-star-selector">
+                    <span class="q-star" data-star="1">★</span>
+                    <span class="q-star" data-star="2">★</span>
+                    <span class="q-star" data-star="3">★</span>
+                    <span class="q-star" data-star="4">★</span>
+                    <span class="q-star" data-star="5">★</span>
+                  </div>
+                </div>
+
+                <!-- Q8: Staff Behaviour -->
+                <div class="q-star-row" data-rating-key="staff_behaviour">
+                  <div class="q-star-row-label"><span class="q-icon">🤝</span> Staff Behaviour</div>
+                  <div class="q-star-selector">
+                    <span class="q-star" data-star="1">★</span>
+                    <span class="q-star" data-star="2">★</span>
+                    <span class="q-star" data-star="3">★</span>
+                    <span class="q-star" data-star="4">★</span>
+                    <span class="q-star" data-star="5">★</span>
+                  </div>
+                </div>
+
+                <!-- Q9: Speed of Service -->
+                <div class="q-star-row" data-rating-key="speed_of_service">
+                  <div class="q-star-row-label"><span class="q-icon">⚡</span> Speed of Service</div>
+                  <div class="q-star-selector">
+                    <span class="q-star" data-star="1">★</span>
+                    <span class="q-star" data-star="2">★</span>
+                    <span class="q-star" data-star="3">★</span>
+                    <span class="q-star" data-star="4">★</span>
+                    <span class="q-star" data-star="5">★</span>
+                  </div>
+                </div>
+
+                <!-- Q10: Ambience -->
+                <div class="q-star-row" data-rating-key="ambience">
+                  <div class="q-star-row-label"><span class="q-icon">🎶</span> Ambience</div>
+                  <div class="q-star-selector">
+                    <span class="q-star" data-star="1">★</span>
+                    <span class="q-star" data-star="2">★</span>
+                    <span class="q-star" data-star="3">★</span>
+                    <span class="q-star" data-star="4">★</span>
+                    <span class="q-star" data-star="5">★</span>
+                  </div>
+                </div>
+
+                <!-- Q11: Value for Money -->
+                <div class="q-star-row" data-rating-key="value_for_money">
+                  <div class="q-star-row-label"><span class="q-icon">💰</span> Value for Money</div>
+                  <div class="q-star-selector">
+                    <span class="q-star" data-star="1">★</span>
+                    <span class="q-star" data-star="2">★</span>
+                    <span class="q-star" data-star="3">★</span>
+                    <span class="q-star" data-star="4">★</span>
+                    <span class="q-star" data-star="5">★</span>
+                  </div>
+                </div>
+
+                <!-- Live Computed Rating Preview -->
+                <div class="q-computed-preview" id="q-computed-preview">
+                  <div class="q-computed-score" id="q-computed-score">0.0</div>
+                  <div class="q-computed-meta">
+                    <div class="q-computed-stars" id="q-computed-stars">☆☆☆☆☆</div>
+                    <div class="q-computed-label">Auto-computed average</div>
+                  </div>
+                </div>
+
+                <div class="q-nav-buttons">
+                  <button type="button" class="btn btn-secondary" id="q-prev-2">
+                    ← Back
+                  </button>
+                  <button type="button" class="btn btn-primary" id="q-next-2">
+                    Next: Final Feedback →
+                  </button>
+                </div>
+              </div>
+
+              <!-- ========== STEP 3: Feedback (Q12-Q15) ========== -->
+              <div class="q-step" id="q-step-3">
+                <div class="q-step-heading">💬 Final Feedback</div>
+                <div class="q-step-subheading">Share your thoughts to help others</div>
+
+                <!-- Q12: Would you visit again? -->
+                <div class="q-section">
+                  <div class="q-section-title">
+                    <span class="q-num">12</span> Would you visit this restaurant again?
+                  </div>
+                  <div class="q-options" id="q-would-visit-again">
+                    <span class="q-option-chip" data-value="Yes">👍 Yes</span>
+                    <span class="q-option-chip" data-value="Maybe">🤔 Maybe</span>
+                    <span class="q-option-chip" data-value="No">👎 No</span>
+                  </div>
+                </div>
+
+                <!-- Q13: What did you like most? -->
+                <div class="q-section">
+                  <div class="q-section-title">
+                    <span class="q-num">13</span> What did you like most?
+                  </div>
+                  <div class="q-options" id="q-liked-most">
+                    <span class="q-option-chip" data-value="Food">🍕 Food</span>
+                    <span class="q-option-chip" data-value="Service">🛎️ Service</span>
+                    <span class="q-option-chip" data-value="Price">💵 Price</span>
+                    <span class="q-option-chip" data-value="Ambience">🎵 Ambience</span>
+                    <span class="q-option-chip" data-value="Cleanliness">✨ Cleanliness</span>
+                    <span class="q-option-chip" data-value="Location">📍 Location</span>
+                    <span class="q-option-chip" data-value="Other">🔮 Other</span>
+                  </div>
+                </div>
+
+                <!-- Q14: What could the restaurant improve? -->
+                <div class="q-section">
+                  <div class="q-section-title">
+                    <span class="q-num">14</span> What could the restaurant improve?
+                  </div>
+                  <textarea id="q-improvement" class="q-textarea" placeholder="Share suggestions for improvement (optional)..." maxlength="500"></textarea>
+                </div>
+
+                <!-- Q15: Favourite dish? -->
+                <div class="q-section">
+                  <div class="q-section-title">
+                    <span class="q-num">15</span> What's your favourite dish here?
+                  </div>
+                  <input type="text" id="q-favourite-dish" class="q-text-input" placeholder="e.g. Butter Chicken, Margherita Pizza... (optional)" maxlength="200">
+                </div>
+
+                <div class="q-nav-buttons">
+                  <button type="button" class="btn btn-secondary" id="q-prev-3">
+                    ← Back
+                  </button>
+                  <button type="submit" id="post-review-btn" class="btn btn-primary btn-lg" style="flex:1;">
+                    ✨ Submit Review & Earn 10 Coins
+                  </button>
+                </div>
+              </div>
+            </div>
           </form>
         </div>
       </div>
@@ -141,7 +375,7 @@
   <script type="module">
     import { initAuth, getCurrentUser, getCurrentProfile } from './assets/js/auth.js';
     import { renderNavigation, renderFooter } from './assets/js/navigation.js';
-    import { getOrCreateDbHotel, fetchHotelReviews, submitNewReview, updateExistingReview, reportReview } from './assets/js/reviews.js';
+    import { getOrCreateDbHotel, fetchHotelReviews, submitQuestionnaireReview, fetchQuestionnaireByHotel, reportReview } from './assets/js/reviews.js';
     import { showToast, escapeHTML, formatDate, renderStarRating } from './assets/js/ui.js';
     import { getDirectionsUrl } from './assets/js/map.js';
 
@@ -149,6 +383,25 @@
     let dbHotelId = null;
     let existingUserReview = null;
     let hotelReviews = [];
+    let questionnaireData = [];
+
+    // Questionnaire state
+    const qRatings = {
+      food_quality: 0,
+      food_taste: 0,
+      food_freshness: 0,
+      menu_variety: 0,
+      cleanliness: 0,
+      staff_behaviour: 0,
+      speed_of_service: 0,
+      ambience: 0,
+      value_for_money: 0
+    };
+    let qVisitFrequency = '';
+    let qPreferredType = '';
+    let qWouldVisitAgain = '';
+    let qLikedMost = '';
+    let currentStep = 1;
 
     async function initHotelPage() {
       await initAuth();
@@ -183,6 +436,11 @@
       }).addTo(miniMap);
       L.marker([currentPlace.lat, currentPlace.lon]).addTo(miniMap);
 
+      // Scroll to review button
+      document.getElementById('scroll-to-review-btn').addEventListener('click', () => {
+        document.getElementById('review-form-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+
       // Ensure Hotel exists in DB
       try {
         dbHotelId = await getOrCreateDbHotel(currentPlace);
@@ -192,7 +450,7 @@
         showToast('Database connection note: ' + err.message, 'warning');
       }
 
-      setupReviewForm();
+      setupQuestionnaireForm();
     }
 
     async function loadReviews() {
@@ -203,14 +461,27 @@
         hotelReviews = await fetchHotelReviews(dbHotelId);
         updateRatingStats(hotelReviews);
 
+        // Fetch questionnaire data for all reviews
+        try {
+          questionnaireData = await fetchQuestionnaireByHotel(dbHotelId);
+        } catch (qErr) {
+          console.warn('Could not fetch questionnaire data:', qErr);
+          questionnaireData = [];
+        }
+
         const currentUser = getCurrentUser();
         if (currentUser) {
-          existingUserReview = hotelReviews.find(r => r.user_id === currentUser.id);
-          if (existingUserReview) {
+          // Check if user already submitted a QUESTIONNAIRE (not just an old text review)
+          const existingQuestionnaire = questionnaireData.find(q => q.user_id === currentUser.id);
+          if (existingQuestionnaire) {
+            existingUserReview = hotelReviews.find(r => r.user_id === currentUser.id);
             document.getElementById('user-existing-review-notice').style.display = 'block';
-            document.getElementById('post-review-btn').textContent = 'Update Review (No Extra Coins)';
-            document.getElementById('review-textarea').value = existingUserReview.review_text;
-            setRatingStars(existingUserReview.rating);
+            // Disable the form since user already submitted questionnaire
+            const form = document.getElementById('submit-review-form');
+            form.style.opacity = '0.4';
+            form.style.pointerEvents = 'none';
+            document.getElementById('post-review-btn').disabled = true;
+            document.getElementById('post-review-btn').textContent = 'Already Reviewed';
           }
         }
 
@@ -241,6 +512,14 @@
       document.getElementById('hotel-avg-stars').innerHTML = renderStarRating(avg);
     }
 
+    function renderMiniStars(rating, maxStars = 5) {
+      let html = '';
+      for (let i = 1; i <= maxStars; i++) {
+        html += `<span class="star-mini ${i <= rating ? 'filled' : ''}">★</span>`;
+      }
+      return html;
+    }
+
     function renderReviewsList(reviews) {
       const container = document.getElementById('reviews-list-container');
       const currentUser = getCurrentUser();
@@ -259,6 +538,65 @@
       container.innerHTML = reviews.map(r => {
         const isMine = currentUser && currentUser.id === r.user_id;
         const displayName = r.profiles?.display_name || r.profiles?.username || 'Reviewer';
+        
+        // Find questionnaire data for this review's user
+        const qData = questionnaireData.find(q => q.user_id === r.user_id);
+
+        // Build breakdown HTML if questionnaire data exists
+        let breakdownHTML = '';
+        if (qData) {
+          const categories = [
+            { label: 'Food Quality', key: 'food_quality_rating' },
+            { label: 'Food Taste', key: 'food_taste_rating' },
+            { label: 'Freshness', key: 'food_freshness_rating' },
+            { label: 'Menu Variety', key: 'menu_variety_rating' },
+            { label: 'Cleanliness', key: 'cleanliness_rating' },
+            { label: 'Staff', key: 'staff_behaviour_rating' },
+            { label: 'Speed', key: 'speed_of_service_rating' },
+            { label: 'Ambience', key: 'ambience_rating' },
+            { label: 'Value', key: 'value_for_money_rating' }
+          ];
+
+          const breakdownItems = categories.map(c => `
+            <div class="review-breakdown-item">
+              <span class="review-breakdown-label">${c.label}</span>
+              <div class="review-breakdown-stars">${renderMiniStars(qData[c.key])}</div>
+            </div>
+          `).join('');
+
+          // Extra details
+          let extraDetails = '';
+          const extraItems = [];
+          if (qData.visit_frequency) {
+            const freqLabels = { rarely: 'Rarely', once_a_month: 'Once a month', '2_3_times_month': '2-3×/month', weekly: 'Weekly', more_than_weekly: 'More than weekly' };
+            extraItems.push(`<div class="review-extra-item"><span class="review-extra-label">Visits:</span><span class="review-extra-value">${freqLabels[qData.visit_frequency] || qData.visit_frequency}</span></div>`);
+          }
+          if (qData.would_visit_again) {
+            const visitLabels = { yes: '👍 Yes', maybe: '🤔 Maybe', no: '👎 No' };
+            extraItems.push(`<div class="review-extra-item"><span class="review-extra-label">Visit again:</span><span class="review-extra-value">${visitLabels[qData.would_visit_again] || qData.would_visit_again}</span></div>`);
+          }
+          if (qData.liked_most) {
+            extraItems.push(`<div class="review-extra-item"><span class="review-extra-label">Liked most:</span><span class="review-extra-value" style="text-transform:capitalize;">${escapeHTML(qData.liked_most)}</span></div>`);
+          }
+          if (qData.favourite_dish) {
+            extraItems.push(`<div class="review-extra-item"><span class="review-extra-label">Fav dish:</span><span class="review-extra-value">${escapeHTML(qData.favourite_dish)}</span></div>`);
+          }
+          if (qData.improvement_suggestion) {
+            extraItems.push(`<div class="review-extra-item"><span class="review-extra-label">Improve:</span><span class="review-extra-value">${escapeHTML(qData.improvement_suggestion)}</span></div>`);
+          }
+
+          if (extraItems.length > 0) {
+            extraDetails = `<div class="review-extra-details" style="display:none;" data-extra-id="${r.id}">${extraItems.join('')}</div>`;
+          }
+
+          breakdownHTML = `
+            <button class="review-breakdown-toggle" data-toggle-id="${r.id}">📊 Show Rating Breakdown</button>
+            <div class="review-breakdown" style="display:none;" data-breakdown-id="${r.id}">
+              ${breakdownItems}
+            </div>
+            ${extraDetails}
+          `;
+        }
 
         return `
           <div class="review-item ${r.is_hidden ? 'review-item-hidden' : ''}">
@@ -280,8 +618,9 @@
               </div>
             </div>
             <div class="review-body">
-              ${escapeHTML(r.review_text)}
+              ${r.review_text ? escapeHTML(r.review_text) : '<span style="color:var(--text-muted); font-style:italic;">Questionnaire-based review</span>'}
             </div>
+            ${breakdownHTML}
             ${r.is_hidden ? '<div style="font-size:11px; color:var(--status-warning); font-style:italic;">This review is currently hidden by admin moderation.</div>' : ''}
           </div>
         `;
@@ -302,56 +641,143 @@
           }
         });
       });
+
+      // Attach breakdown toggle handlers
+      document.querySelectorAll('.review-breakdown-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const reviewId = btn.getAttribute('data-toggle-id');
+          const breakdown = document.querySelector(`[data-breakdown-id="${reviewId}"]`);
+          const extra = document.querySelector(`[data-extra-id="${reviewId}"]`);
+          
+          if (breakdown) {
+            const isHidden = breakdown.style.display === 'none';
+            breakdown.style.display = isHidden ? 'grid' : 'none';
+            if (extra) extra.style.display = isHidden ? 'grid' : 'none';
+            btn.textContent = isHidden ? '📊 Hide Rating Breakdown' : '📊 Show Rating Breakdown';
+          }
+        });
+      });
     }
 
-    function setupReviewForm() {
+    // ============================================================
+    // QUESTIONNAIRE FORM LOGIC
+    // ============================================================
+
+    function setupQuestionnaireForm() {
       const currentUser = getCurrentUser();
       const authNotice = document.getElementById('review-auth-notice');
       const form = document.getElementById('submit-review-form');
-      const charCounter = document.getElementById('char-counter');
-      const textarea = document.getElementById('review-textarea');
-      const submitBtn = document.getElementById('post-review-btn');
 
       if (!currentUser) {
         authNotice.style.display = 'block';
-        form.style.opacity = '0.5';
-        form.querySelectorAll('input, textarea, button').forEach(el => el.disabled = true);
+        form.style.opacity = '0.4';
+        form.style.pointerEvents = 'none';
         return;
       }
 
-      // Star Selector Interactive
-      const stars = document.querySelectorAll('.star-interactive');
-      stars.forEach(star => {
-        star.addEventListener('click', () => {
-          const val = parseInt(star.getAttribute('data-star'), 10);
-          setRatingStars(val);
+      // Setup option chip selectors (Q1, Q2, Q12, Q13)
+      setupChipSelector('q-visit-frequency', (val) => { qVisitFrequency = val; });
+      setupChipSelector('q-preferred-type', (val) => { qPreferredType = val; });
+      setupChipSelector('q-would-visit-again', (val) => { qWouldVisitAgain = val; });
+      setupChipSelector('q-liked-most', (val) => { qLikedMost = val; });
+
+      // Setup star selectors for all 9 rating rows
+      document.querySelectorAll('.q-star-row').forEach(row => {
+        const key = row.getAttribute('data-rating-key');
+        const stars = row.querySelectorAll('.q-star');
+        
+        stars.forEach(star => {
+          star.addEventListener('click', () => {
+            const val = parseInt(star.getAttribute('data-star'), 10);
+            qRatings[key] = val;
+            updateRowStars(row, val);
+            updateComputedPreview();
+          });
+
+          // Hover preview
+          star.addEventListener('mouseenter', () => {
+            const hoverVal = parseInt(star.getAttribute('data-star'), 10);
+            previewRowStars(row, hoverVal);
+          });
+        });
+
+        // Reset on mouse leave
+        row.querySelector('.q-star-selector').addEventListener('mouseleave', () => {
+          updateRowStars(row, qRatings[key]);
         });
       });
 
-      // Character Counter
-      textarea.addEventListener('input', () => {
-        charCounter.textContent = `${textarea.value.length} / 1000`;
+      // Step navigation
+      document.getElementById('q-next-1').addEventListener('click', () => {
+        if (!qVisitFrequency) {
+          showToast('Please select how often you visit restaurants (Q1)', 'warning');
+          return;
+        }
+        if (!qPreferredType) {
+          showToast('Please select your preferred restaurant type (Q2)', 'warning');
+          return;
+        }
+        goToStep(2);
       });
 
-      // Form Submit
+      document.getElementById('q-prev-2').addEventListener('click', () => goToStep(1));
+      document.getElementById('q-next-2').addEventListener('click', () => {
+        // Validate all ratings are filled
+        const missingRatings = Object.entries(qRatings).filter(([, v]) => v === 0);
+        if (missingRatings.length > 0) {
+          const labels = {
+            food_quality: 'Food Quality', food_taste: 'Food Taste', food_freshness: 'Food Freshness',
+            menu_variety: 'Menu Variety', cleanliness: 'Cleanliness', staff_behaviour: 'Staff Behaviour',
+            speed_of_service: 'Speed of Service', ambience: 'Ambience', value_for_money: 'Value for Money'
+          };
+          const missing = missingRatings.map(([k]) => labels[k]).join(', ');
+          showToast(`Please rate: ${missing}`, 'warning');
+          return;
+        }
+        goToStep(3);
+      });
+
+      document.getElementById('q-prev-3').addEventListener('click', () => goToStep(2));
+
+      // Form submission
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Processing...';
 
-        const rating = parseInt(document.getElementById('selected-rating').value, 10);
-        const reviewText = textarea.value;
+        // Validate step 3 required fields
+        if (!qWouldVisitAgain) {
+          showToast('Please answer: Would you visit again? (Q12)', 'warning');
+          return;
+        }
+        if (!qLikedMost) {
+          showToast('Please select what you liked most (Q13)', 'warning');
+          return;
+        }
+
+        const submitBtn = document.getElementById('post-review-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Submitting...';
+
+        const answers = {
+          visit_frequency: qVisitFrequency,
+          preferred_type: qPreferredType,
+          food_quality: qRatings.food_quality,
+          food_taste: qRatings.food_taste,
+          food_freshness: qRatings.food_freshness,
+          menu_variety: qRatings.menu_variety,
+          cleanliness: qRatings.cleanliness,
+          staff_behaviour: qRatings.staff_behaviour,
+          speed_of_service: qRatings.speed_of_service,
+          ambience: qRatings.ambience,
+          value_for_money: qRatings.value_for_money,
+          would_visit_again: qWouldVisitAgain,
+          liked_most: qLikedMost,
+          improvement: document.getElementById('q-improvement').value.trim(),
+          favourite_dish: document.getElementById('q-favourite-dish').value.trim()
+        };
 
         try {
-          if (existingUserReview) {
-            // Edit Review RPC
-            await updateExistingReview(existingUserReview.id, rating, reviewText);
-            showToast('Review updated successfully!', 'success');
-          } else {
-            // New Review RPC -> Credits 10 Coins
-            const res = await submitNewReview(dbHotelId, rating, reviewText);
-            showToast('🎉 Review posted! You earned 10 FDA Coins!', 'success');
-          }
+          await submitQuestionnaireReview(dbHotelId, answers);
+          showToast('🎉 Review posted! You earned 10 FDA Coins!', 'success');
 
           // Reload reviews and re-sync nav wallet
           await loadReviews();
@@ -359,23 +785,84 @@
         } catch (err) {
           console.error('Review submission error:', err);
           showToast(err.message || 'Failed to submit review.', 'error');
-        } finally {
           submitBtn.disabled = false;
-          submitBtn.textContent = existingUserReview ? 'Update Review (No Extra Coins)' : 'Submit Review & Earn 10 Coins';
+          submitBtn.textContent = '✨ Submit Review & Earn 10 Coins';
         }
       });
     }
 
-    function setRatingStars(val) {
-      document.getElementById('selected-rating').value = val;
-      document.querySelectorAll('.star-interactive').forEach(s => {
-        const starVal = parseInt(s.getAttribute('data-star'), 10);
-        if (starVal <= val) {
-          s.classList.add('active');
-        } else {
-          s.classList.remove('active');
-        }
+    function setupChipSelector(containerId, onSelect) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      container.querySelectorAll('.q-option-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          // Deselect all siblings
+          container.querySelectorAll('.q-option-chip').forEach(c => c.classList.remove('selected'));
+          // Select this one
+          chip.classList.add('selected');
+          onSelect(chip.getAttribute('data-value'));
+        });
       });
+    }
+
+    function updateRowStars(row, val) {
+      row.querySelectorAll('.q-star').forEach(s => {
+        const starVal = parseInt(s.getAttribute('data-star'), 10);
+        s.classList.toggle('active', starVal <= val);
+      });
+    }
+
+    function previewRowStars(row, hoverVal) {
+      row.querySelectorAll('.q-star').forEach(s => {
+        const starVal = parseInt(s.getAttribute('data-star'), 10);
+        s.classList.toggle('active', starVal <= hoverVal);
+      });
+    }
+
+    function updateComputedPreview() {
+      const vals = Object.values(qRatings);
+      const filledVals = vals.filter(v => v > 0);
+      const avg = filledVals.length > 0 ? (filledVals.reduce((a, b) => a + b, 0) / filledVals.length) : 0;
+      const avgDisplay = avg.toFixed(1);
+
+      document.getElementById('q-computed-score').textContent = avgDisplay;
+      
+      const rounded = Math.round(avg);
+      let starsHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        starsHTML += i <= rounded ? '<span class="star-filled">★</span>' : '<span class="star-empty">☆</span>';
+      }
+      document.getElementById('q-computed-stars').innerHTML = starsHTML;
+
+      // Update label to show progress
+      const label = `${filledVals.length}/9 categories rated`;
+      document.querySelector('.q-computed-label').textContent = label;
+    }
+
+    function goToStep(step) {
+      currentStep = step;
+
+      // Update steps visibility
+      document.querySelectorAll('.q-step').forEach(s => s.classList.remove('active'));
+      document.getElementById(`q-step-${step}`).classList.add('active');
+
+      // Update progress dots
+      document.querySelectorAll('.q-progress-dot').forEach(dot => {
+        const dotStep = parseInt(dot.getAttribute('data-step'), 10);
+        dot.classList.remove('active', 'completed');
+        if (dotStep === step) dot.classList.add('active');
+        else if (dotStep < step) dot.classList.add('completed');
+      });
+
+      // Update progress lines
+      document.querySelectorAll('.q-progress-line').forEach(line => {
+        const lineStep = parseInt(line.getAttribute('data-line'), 10);
+        line.classList.toggle('completed', lineStep < step);
+      });
+
+      // Scroll form into view
+      document.getElementById('review-form-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     window.addEventListener('DOMContentLoaded', initHotelPage);
