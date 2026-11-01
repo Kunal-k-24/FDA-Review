@@ -60,7 +60,7 @@
       </div>
       
       <div style="text-align: center; margin-top: var(--space-4); font-size: 11px; color: var(--text-muted);">
-        Created by Aditya Thorat &amp; Team &bull; MIT CSN
+        Created by Swarali Gosavi &amp; Team &bull; SKNCOE
       </div>
     </div>
   </main>
@@ -73,7 +73,7 @@
     import { showToast } from './assets/js/ui.js';
     import { supabase } from './assets/js/supabase-client.js';
 
-    const DEMO_PASSWORD = 'Demo@FDA2026!';
+    const DEMO_PASSWORD = 'develop-or-hack';
 
     async function initRegisterPage() {
       await initAuth();
@@ -92,7 +92,7 @@
 
         try {
           // Log into user identity seamlessly in the background
-          const result = await loginWithDemoAccount('aditya thorat', DEMO_PASSWORD);
+          const result = await loginWithDemoAccount('swarali', DEMO_PASSWORD);
 
           // Update display name to the newly registered user's custom name
           if (enteredName && result.user) {

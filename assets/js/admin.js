@@ -14,6 +14,12 @@ export async function fetchAdminOverviewStats() {
     supabase.from('coin_transactions').select('amount_coins').gt('amount_coins', 0)
   ]);
 
+  if (usersCount.error) console.warn('profiles count error:', usersCount.error.message);
+  if (hotelsCount.error) console.warn('hotels count error:', hotelsCount.error.message);
+  if (reviewsCount.error) console.warn('reviews count error:', reviewsCount.error.message);
+  if (redemptionsPending.error) console.warn('redemptions count error:', redemptionsPending.error.message);
+  if (coinsAwarded.error) console.warn('coins error:', coinsAwarded.error.message);
+
   let totalCoinsIssued = 0;
   if (coinsAwarded.data) {
     totalCoinsIssued = coinsAwarded.data.reduce((acc, row) => acc + (Number(row.amount_coins) || 0), 0);
@@ -37,7 +43,7 @@ export async function fetchAdminUsers() {
       display_name,
       role,
       created_at,
-      wallets:id (
+      wallets!wallets_user_id_fkey (
         balance_coins
       )
     `)
