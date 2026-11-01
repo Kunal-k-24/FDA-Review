@@ -27,8 +27,6 @@ export const CONFIG = {
 
   // Provisioned System Accounts Reference
   PROVISIONED_ACCOUNTS: [
-    { username: 'swarali', email: 'swarali@developer.com', role: 'user', label: 'Swarali Gosavi' },
-    { username: 'skncoe_admin', email: 'skncoe@admin.com', role: 'admin', label: 'SKNCOE Admin' },
     { username: 'aditya thorat', email: 'aditya@fdareview.demo', role: 'user', label: 'Aditya Thorat' },
     { username: 'mitadmin', email: 'mitadmin@fdareview.demo', role: 'admin', label: 'MIT Admin' },
     { username: 'cseproject', email: 'cseproject@fdareview.demo', role: 'user', label: 'CSE Project' },

@@ -137,7 +137,7 @@ export function renderFooter() {
         <div>
           <strong style="color:var(--text-primary);">FDAReview</strong> &mdash; Discover great hotels & restaurants, post verified reviews, and earn FDA Coins.
           <div style="font-size:12px;margin-top:4px;">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.</div>
-          <div style="font-size:12px;margin-top:4px;color:var(--accent-primary);font-weight:600;">Created by Swarali Gosavi &amp; Team &bull; SKNCOE</div>
+          <div style="font-size:12px;margin-top:4px;color:var(--accent-primary);font-weight:600;">Created by Aditya Thorat & Team &bull; MIT CSN</div>
         </div>
         <div style="font-size:12px;">
           Redemption is simulated &bull; 1,000 FDA Coins = ₹10

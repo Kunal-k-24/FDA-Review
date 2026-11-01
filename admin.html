@@ -204,16 +204,17 @@
         document.getElementById('stat-reviews').textContent = stats.totalReviews;
         document.getElementById('stat-coins').textContent = formatCoins(stats.totalCoinsIssued);
         document.getElementById('stat-pending').textContent = stats.pendingRedemptions;
-      } catch (err) {
-        console.error('Error loading admin stats:', err);
-      }
 
-      await Promise.allSettled([
-        loadRedemptions().catch(e => console.error('Redemptions error:', e.message)),
-        loadReviews().catch(e => console.error('Reviews error:', e.message)),
-        loadUsers().catch(e => console.error('Users error:', e.message))
-      ]);
-      showToast('Admin data up to date!', 'success');
+        await Promise.all([
+          loadRedemptions(),
+          loadReviews(),
+          loadUsers()
+        ]);
+        showToast('Admin data up to date!', 'success');
+      } catch (err) {
+        console.error('Error loading admin overview:', err);
+        showToast('Admin query failed: ' + err.message, 'error');
+      }
     }
 
     async function loadRedemptions() {
@@ -348,7 +349,7 @@
       const users = await fetchAdminUsers();
 
       tbody.innerHTML = users.map(u => {
-      const balance = Array.isArray(u.wallets) ? (u.wallets[0]?.balance_coins ?? 0) : (u.wallets?.balance_coins ?? 0);
+        const balance = u.wallets ? u.wallets.balance_coins : 0;
         return `
           <tr>
             <td><code>${escapeHTML(u.username)}</code></td>
